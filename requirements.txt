@@ -1,0 +1,13 @@
+﻿torch>=2.0.0
+sentence-transformers
+transformers
+pdfplumber
+faiss-cpu
+tensorboard
+pandas
+numpy
+matplotlib
+seaborn
+tiktoken
+huggingface-hub
+jupyter
