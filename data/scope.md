@@ -1,43 +1,58 @@
-﻿# Quantum Mechanics Knowledge Scope
+﻿@"
 
-## ✅ INCLUDED (Introductory Level)
+# Quantum Mechanics Knowledge Scope
 
-### Core Concepts
-- Wave-particle duality
+## ✅ INCLUDED
+
+### Scope Definition
+
+**All content from the collected introductory quantum mechanics documents is included by default**, as these documents already focus on fundamentals and basic concepts.
+
+### Expected Content (Based on Typical Intro QM Texts)
+
+- Wave-particle duality and experimental foundations
 - Schrödinger equation (time-dependent and time-independent)
-- Wavefunctions and probability interpretation
+- Wavefunctions, probability interpretation, and normalization
+- Operators, observables, and measurement
 - Uncertainty principle
-- Quantum superposition
-- Quantum tunneling
-- Harmonic oscillator
+- One-dimensional problems (infinite well, finite well, harmonic oscillator, tunneling)
 - Hydrogen atom (basic treatment)
-- Spin and angular momentum (introductory)
+- Angular momentum and spin (introductory)
+- Basic mathematical formalism (Dirac notation, Hilbert spaces)
+- Postulates of quantum mechanics
 
-### Mathematical Tools
-- Basic differential equations
-- Linear algebra (vectors, matrices, eigenvalues)
-- Fourier transforms (conceptual)
-- Dirac notation (bra-ket)
+## ❌ EXCLUDED (Minimal Filtering)
 
-## ❌ EXCLUDED (Advanced Topics)
+### Content to Remove During Cleaning
 
-### Advanced Theory
+- **Problem sets and exercises**: Remove homework problems, practice exercises, and their solutions
+- **Exam materials**: Remove midterm/final exam questions
+- **Administrative content**: Remove syllabi, course schedules, grading policies
+- **Duplicate sections**: Remove if same content appears multiple times
+
+### Advanced Topics (Only if Present)
+
 - Quantum field theory
-- Path integrals (Feynman formulation)
-- Relativistic quantum mechanics
-- Advanced scattering theory
-- Many-body quantum mechanics
-- Quantum information theory (advanced)
+- Relativistic quantum mechanics (Dirac equation, Klein-Gordon)
+- Advanced many-body theory
+- Detailed group theory proofs
 
-### Advanced Mathematics
-- Complex proofs (keep only results)
-- Advanced group theory
-- Detailed derivations beyond intro level
+## 🎯 Processing Philosophy
 
-### Problem Sets
-- Exercises and solutions
-- Homework problems
-- Exam questions
+**"Trust the documents"**: Since we're using introductory textbooks and lecture notes, the scope is naturally appropriate. Our job is to:
 
-## 🎯 Target Audience
-Undergraduate students (2nd-3rd year) or beginners in quantum mechanics.
+1. Extract text cleanly
+2. Remove non-content (exercises, admin)
+3. Keep all conceptual and mathematical explanations as-is
+
+**No manual filtering of physics concepts** - if it's in an intro QM document, it belongs in our knowledge base.
+
+## 📚 Document Sources
+
+List your actual documents here as you add them:
+
+- [ ] Document 1: [title/description]
+- [ ] Document 2: [title/description]
+- [ ] Document 3: [title/description]
+
+"@ | Out-File -FilePath "data\scope.md" -Encoding UTF8 -Force
