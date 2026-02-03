@@ -1,0 +1,151 @@
+{
+  "name": "Book Analyzer - Main Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analyze-book",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "book-analyzer-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract book title from webhook body\nconst bookTitle = $input.item.json.body.bookTitle || $input.item.json.bookTitle;\n\nif (!bookTitle) {\n  throw new Error('bookTitle is required');\n}\n\n// Validate title\nif (typeof bookTitle !== 'string' || bookTitle.trim().length === 0) {\n  throw new Error('bookTitle must be a non-empty string');\n}\n\nreturn {\n  bookTitle: bookTitle.trim(),\n  requestedAt: new Date().toISOString()\n};"
+      },
+      "id": "extract-title",
+      "name": "Extract & Validate Title",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:3000/analyze",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "bookTitle",
+              "value": "={{ $json.bookTitle }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 65000
+        }
+      },
+      "id": "call-mcp-server",
+      "name": "Call MCP Server",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if MCP Server response was successful\nconst data = $input.item.json;\n\nif (data.success === true) {\n  // Success case - pass through the data\n  return [data];\n} else {\n  // Error case - throw error to stop workflow\n  throw new Error(`Analysis failed: ${data.error || 'Unknown error'}`);\n}"
+      },
+      "id": "check-success",
+      "name": "Check Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format successful response\nconst data = $input.item.json;\n\nreturn {\n  success: true,\n  bookInfo: {\n    title: data.bookInfo.title,\n    authors: data.bookInfo.authors,\n    publishedDate: data.bookInfo.publishedDate,\n    isbn: data.bookInfo.isbn,\n    categories: data.bookInfo.categories,\n    thumbnail: data.bookInfo.thumbnail,\n    infoLink: data.bookInfo.infoLink\n  },\n  summary: data.analysis.summary,\n  keyIdeas: data.analysis.keyIdeas,\n  audioFile: data.audio ? data.audio.filename : null,\n  audioPath: data.audio ? data.audio.path : null,\n  audioDownloadUrl: data.audio ? `http://localhost:3000/audio/${data.audio.filename}` : null,\n  metadata: {\n    analyzedAt: data.metadata.analyzedAt,\n    llmModel: data.metadata.llmModel\n  }\n};"
+      },
+      "id": "format-success",
+      "name": "Format Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 200]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract & Validate Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract & Validate Title": {
+      "main": [
+        [
+          {
+            "node": "Call MCP Server",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call MCP Server": {
+      "main": [
+        [
+          {
+            "node": "Check Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Success": {
+      "main": [
+        [
+          {
+            "node": "Format Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Success Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-27T00:00:00.000Z",
+  "versionId": "1"
+}

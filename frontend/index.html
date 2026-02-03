@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Book Analyzer - Analyse Intelligente de Livres</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-section {
+            text-align: center;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .book-info {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .book-cover {
+            width: 120px;
+            height: 180px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .book-details h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .book-details .author {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .book-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .analysis-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .analysis-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-text {
+            line-height: 1.8;
+            color: #34495e;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .key-ideas {
+            display: grid;
+            gap: 15px;
+        }
+
+        .idea-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .idea-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .audio-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .audio-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .audio-player {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .download-btn {
+            background: #27ae60;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #c33;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .suggestions {
+            background: #e8f4f8;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .suggestions h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+        }
+
+        .chip:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .book-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .book-meta {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Book Analyzer</h1>
+            <p>Analyse intelligente de livres avec résumés et génération audio</p>
+        </header>
+
+        <main>
+            <div class="main-card">
+                <section class="search-section">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="bookTitle" 
+                            class="search-input" 
+                            placeholder="Entrez le nom du livre..."
+                            autocomplete="off"
+                        >
+                        <button id="analyzeBtn" class="search-btn">
+                            <i class="fas fa-search"></i>
+                            Analyser
+                        </button>
+                    </div>
+
+                    <div class="suggestions">
+                        <h3><i class="fas fa-lightbulb"></i> Suggestions populaires</h3>
+                        <div class="suggestion-chips">
+                            <div class="chip" data-book="Atomic Habits">Atomic Habits</div>
+                            <div class="chip" data-book="1984">1984</div>
+                            <div class="chip" data-book="The Great Gatsby">The Great Gatsby</div>
+                            <div class="chip" data-book="Thinking, Fast and Slow">Thinking, Fast and Slow</div>
+                            <div class="chip" data-book="The 7 Habits of Highly Effective People">7 Habits</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <h3>Analyse en cours...</h3>
+                    <p>Veuillez patienter pendant que nous analysons votre livre</p>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+
+                <div class="results" id="results">
+                    <section class="book-info" id="bookInfo">
+                        <!-- Book info will be populated here -->
+                    </section>
+
+                    <section class="analysis-section">
+                        <h3><i class="fas fa-brain"></i> Résumé de l'analyse</h3>
+                        <div class="summary-text" id="summaryText"></div>
+                    </section>
+
+                    <section class="analysis-section">
+                        <h3><i class="fas fa-key"></i> 7 Idées Clés</h3>
+                        <div class="key-ideas" id="keyIdeas">
+                            <!-- Key ideas will be populated here -->
+                        </div>
+                    </section>
+
+                    <section class="audio-section" id="audioSection">
+                        <h3><i class="fas fa-headphones"></i> Version Audio</h3>
+                        <div class="audio-player" id="audioPlayer">
+                            <!-- Audio player will be populated here -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5678/webhook-test/analyze-book';
+        
+        // DOM Elements
+        const bookTitleInput = document.getElementById('bookTitle');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const bookInfo = document.getElementById('bookInfo');
+        const summaryText = document.getElementById('summaryText');
+        const keyIdeas = document.getElementById('keyIdeas');
+        const audioSection = document.getElementById('audioSection');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // Event Listeners
+        analyzeBtn.addEventListener('click', analyzeBook);
+        bookTitleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') analyzeBook();
+        });
+
+        // Suggestion chips
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                bookTitleInput.value = chip.dataset.book;
+                analyzeBook();
+            });
+        });
+
+        async function analyzeBook() {
+            const bookTitle = bookTitleInput.value.trim();
+            
+            if (!bookTitle) {
+                showError('Veuillez entrer un nom de livre');
+                return;
+            }
+
+            // Show loading
+            showLoading(true);
+            hideError();
+            hideResults();
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bookTitle })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erreur lors de l\'analyse');
+                }
+
+                displayResults(data);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayResults(data) {
+            // Display book info
+            bookInfo.innerHTML = `
+                <img src="${data.bookInfo.thumbnail || 'https://via.placeholder.com/120x180?text=No+Cover'}" 
+                     alt="${data.bookInfo.title}" 
+                     class="book-cover">
+                <div class="book-details">
+                    <h2>${data.bookInfo.title}</h2>
+                    <div class="author">par ${data.bookInfo.authors.join(', ')}</div>
+                    <div class="book-meta">
+                        <div class="meta-item"><i class="fas fa-calendar"></i> ${data.bookInfo.publishedDate}</div>
+                        <div class="meta-item"><i class="fas fa-file-alt"></i> ${data.bookInfo.pageCount} pages</div>
+                        <div class="meta-item"><i class="fas fa-barcode"></i> ${data.bookInfo.isbn}</div>
+                        ${data.bookInfo.categories.length > 0 ? 
+                            `<div class="meta-item"><i class="fas fa-tag"></i> ${data.bookInfo.categories.join(', ')}</div>` : ''
+                        }
+                    </div>
+                </div>
+            `;
+
+            // Display summary
+            summaryText.textContent = data.summary;
+
+            // Display key ideas
+            keyIdeas.innerHTML = data.keyIdeas.map((idea, index) => `
+                <div class="idea-item">
+                    <div class="idea-number">${index + 1}</div>
+                    <div>${idea}</div>
+                </div>
+            `).join('');
+
+            // Display audio if available
+            if (data.audioFile) {
+                audioSection.style.display = 'block';
+                audioPlayer.innerHTML = `
+                    <audio controls style="width: 100%; margin-bottom: 15px;">
+                        <source src="${data.audioDownloadUrl}" type="audio/mpeg">
+                        Votre navigateur ne supporte pas l'élément audio.
+                    </audio>
+                    <div>
+                        <strong>Fichier:</strong> ${data.audioFile}<br>
+                        <strong>Taille:</strong> ${Math.round(data.audioPath ? 0 : 0)} KB<br>
+                        <a href="${data.audioDownloadUrl}" class="download-btn" download>
+                            <i class="fas fa-download"></i> Télécharger MP3
+                        </a>
+                    </div>
+                `;
+            } else {
+                audioSection.style.display = 'none';
+            }
+
+            showResults();
+        }
+
+        function showLoading(show) {
+            loading.classList.toggle('active', show);
+            analyzeBtn.disabled = show;
+            if (show) {
+                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyse...';
+            } else {
+                analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyser';
+            }
+        }
+
+        function showResults() {
+            results.classList.add('active');
+        }
+
+        function hideResults() {
+            results.classList.remove('active');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
